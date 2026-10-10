@@ -23,7 +23,7 @@ const getApiBaseUrl = () => {
   if (isLocalhost) {
     return 'http://localhost:5001/api';
   }
-  return 'https://dara-digital-backend.onrender.com/api';
+  return 'https://dara-digital-backend-1.onrender.com/api';
 };
 
 export const API_BASE_URL = getApiBaseUrl();
