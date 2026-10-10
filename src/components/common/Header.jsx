@@ -8,13 +8,13 @@ import {
   Languages,
   Wallet,
   Plus,
-  Zap,
-  Sparkles
+  Download
 } from 'lucide-react';
 import { useAuth } from '../../context/AuthContext.jsx';
 import { useTheme } from '../../context/ThemeContext.jsx';
 import { useLanguage } from '../../context/LanguageContext.jsx';
 import { useTelegram } from '../../hooks/useTelegram.js';
+import { useInstallApp } from '../../context/InstallAppContext.jsx';
 import { UserAvatar } from './UserAvatar.jsx';
 import { TopUpModal } from '../payment/TopUpModal.jsx';
 import { MenuDrawer } from './MenuDrawer.jsx';
@@ -24,6 +24,7 @@ export function Header() {
   const { theme, toggleTheme } = useTheme();
   const { lang, toggleLanguage, t } = useLanguage();
   const { haptic } = useTelegram();
+  const { triggerInstall, isStandalone } = useInstallApp();
   const [menuOpen, setMenuOpen] = useState(false);
   const [topUpOpen, setTopUpOpen] = useState(false);
 
@@ -31,21 +32,10 @@ export function Header() {
 
   return (
     <>
-      <header className="sticky top-0 z-40 w-full glass-panel border-b border-slate-800/80 transition-colors">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between gap-3 sm:gap-4">
-          {/* Left: Menu Button & Brand Logo */}
+      <header className="sticky top-0 z-40 w-full glass-panel border-b border-slate-800/80 transition-colors pt-[env(safe-area-inset-top,0px)]">
+        <div className="max-w-7xl mx-auto px-3 sm:px-6 lg:px-8 h-16 flex items-center justify-between gap-2.5 sm:gap-4">
+          {/* Left: Brand Logo & Title */}
           <div className="flex items-center gap-2.5 sm:gap-3">
-            {/* Menu Hamburger Button */}
-            <button
-              onClick={() => {
-                haptic('medium');
-                setMenuOpen(true);
-              }}
-              title="Open Navigation Menu"
-              className="p-2 rounded-xl bg-slate-900/90 hover:bg-slate-800 border border-slate-800 text-slate-300 hover:text-white transition-all flex items-center justify-center flex-shrink-0 active:scale-95 group shadow-sm"
-            >
-              <Menu className="w-5 h-5 text-slate-300 group-hover:text-emerald-400 transition-colors" />
-            </button>
 
             {/* Logo & Brand */}
             <Link to="/" className="flex items-center gap-2 group py-0.5">
@@ -62,29 +52,6 @@ export function Header() {
 
           {/* Right Action Icons */}
           <div className="flex items-center gap-1.5 sm:gap-2.5">
-            {/* Top-Up GamePass Menu Button */}
-            <Link
-              to="/topup?tab=gamepass"
-              onClick={() => haptic('light')}
-              className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-gradient-to-r from-amber-500/20 via-pink-500/20 to-purple-500/20 border border-amber-500/40 hover:border-pink-500/60 text-amber-300 hover:text-white text-xs font-black shadow-sm transition-all active:scale-95 group"
-              title="Top-Up GamePass"
-            >
-              <Sparkles className="w-3.5 h-3.5 text-amber-400 group-hover:scale-110 transition-transform" />
-              <span>GamePass</span>
-              <span className="hidden sm:inline px-1 py-0.2 rounded text-[9px] bg-amber-500/30 text-amber-200 uppercase font-black">
-                HOT
-              </span>
-            </Link>
-
-            {/* Robux Top-Up Quick Link */}
-            <Link
-              to="/topup?tab=robux"
-              onClick={() => haptic('light')}
-              className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-gradient-to-r from-pink-500/20 to-purple-500/20 border border-pink-500/40 text-pink-300 hover:text-white text-xs font-black shadow-sm transition-all active:scale-95 group"
-            >
-              <Zap className="w-3.5 h-3.5 text-pink-400 fill-pink-400 group-hover:scale-110 transition-transform" />
-              <span>Top-Up</span>
-            </Link>
             {user ? (
               <>
                 {/* Wallet Balance Chip */}
@@ -153,6 +120,22 @@ export function Header() {
                   />
                 </svg>
                 <span>Sign In / Register</span>
+              </button>
+            )}
+
+            {/* Install App button for Desktop */}
+            {!isStandalone && (
+              <button
+                type="button"
+                onClick={() => {
+                  haptic('impactLight');
+                  triggerInstall();
+                }}
+                title="Install App on Phone / PC"
+                className="hidden md:flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-gradient-to-r from-red-600/20 to-rose-600/20 hover:from-red-600/30 hover:to-rose-600/30 border border-red-500/40 text-xs font-bold text-red-200 transition-all hover:scale-105 active:scale-95 shadow-sm"
+              >
+                <Download className="w-3.5 h-3.5 text-red-400" />
+                <span>{lang === 'km' ? 'ដំឡើង App' : 'Install App'}</span>
               </button>
             )}
 

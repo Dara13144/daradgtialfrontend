@@ -2,13 +2,13 @@ import React from 'react';
 import { CheckCircle2, AlertCircle, XCircle } from 'lucide-react';
 import { useLanguage } from '../../context/LanguageContext.jsx';
 
-export function StockBadge({ quantity, stockType }) {
+export function StockBadge({ quantity, stockType, isGamepass = false }) {
   const { t } = useLanguage();
 
-  if (stockType === 'manual') {
+  if (stockType === 'manual' || isGamepass || quantity >= 999) {
     return (
-      <span className="inline-flex items-center gap-1 text-[11px] font-bold text-emerald-400 bg-emerald-950/60 border border-emerald-500/40 px-2 py-0.5 rounded-full">
-        <CheckCircle2 className="w-3 h-3" />
+      <span className="inline-flex items-center gap-1 text-[11px] font-bold text-emerald-400 bg-emerald-950/60 border border-emerald-500/40 px-2 py-0.5 rounded-full shadow-sm">
+        <CheckCircle2 className="w-3 h-3 text-emerald-400" />
         <span>Instant Delivery</span>
       </span>
     );

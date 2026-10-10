@@ -453,7 +453,10 @@ export function AdminProducts() {
             </thead>
             <tbody className="divide-y divide-slate-800/60">
               {displayedProducts.map((p) => {
-                const isGp = p.category?.slug === 'gamepass' || p.name?.toLowerCase().includes('gamepass');
+                const nameLower = (p.name || '').toLowerCase();
+                const isGp = p.category?.slug === 'gamepass' || nameLower.includes('gamepass');
+                const isRobux = p.category?.slug === 'topup' || p.category?.slug === 'robux' || nameLower.includes('robux') || nameLower.includes('top-up') || nameLower.includes('topup');
+                const isUnlimited = isGp || isRobux || p.stock_type === 'manual';
 
                 return (
                   <tr key={p.id} className="hover:bg-slate-900/40">
@@ -464,6 +467,8 @@ export function AdminProducts() {
                             p.images?.[0] ||
                             (isGp
                               ? '/categories/gamepass.png'
+                              : isRobux
+                              ? '/icons/robux_gold.png'
                               : p.image_url ||
                                 'https://images.unsplash.com/photo-1550745165-9bc0b252726f?w=600')
                           }
@@ -474,8 +479,13 @@ export function AdminProducts() {
                           <div className="flex items-center gap-1.5 flex-wrap">
                             <p className="font-bold text-slate-100 line-clamp-1">{p.name}</p>
                             {isGp && (
-                              <span className="px-1.5 py-0.2 rounded text-[9px] font-black uppercase bg-amber-500/20 text-amber-300 border border-amber-500/40">
+                              <span className="px-1.5 py-0.5 rounded text-[9px] font-black uppercase bg-amber-500/20 text-amber-300 border border-amber-500/40">
                                 GamePass
+                              </span>
+                            )}
+                            {isRobux && (
+                              <span className="px-1.5 py-0.5 rounded text-[9px] font-black uppercase bg-rose-500/20 text-rose-300 border border-rose-500/40">
+                                Robux Top-Up
                               </span>
                             )}
                           </div>
@@ -491,6 +501,8 @@ export function AdminProducts() {
                     <td className="py-3 px-4 uppercase font-bold text-[10px] text-slate-300">
                       {isGp ? (
                         <span className="text-amber-400">Manual / Trade</span>
+                      ) : isRobux ? (
+                        <span className="text-rose-400">Instant Top-Up</span>
                       ) : (
                         p.stock_type
                       )}
@@ -499,7 +511,12 @@ export function AdminProducts() {
                       {isGp ? (
                         <div className="inline-flex items-center gap-1 px-2.5 py-1 rounded-lg bg-amber-500/10 border border-amber-500/30 text-amber-300 text-[11px] font-bold">
                           <Clock className="w-3.5 h-3.5 text-amber-400" />
-                          <span>1h - 24h Delivery</span>
+                          <span>1h - 24h (No Stock Needed)</span>
+                        </div>
+                      ) : isRobux ? (
+                        <div className="inline-flex items-center gap-1 px-2.5 py-1 rounded-lg bg-emerald-500/10 border border-emerald-500/30 text-emerald-300 text-[11px] font-bold">
+                          <Sparkles className="w-3.5 h-3.5 text-emerald-400" />
+                          <span>Unlimited (No Stock Needed)</span>
                         </div>
                       ) : (
                         <div className="flex items-center gap-2">
@@ -611,11 +628,22 @@ export function AdminProducts() {
               <select
                 required
                 value={formData.category_id}
-                onChange={(e) => setFormData({ ...formData, category_id: e.target.value })}
+                onChange={(e) => {
+                  const catId = e.target.value;
+                  const selectedCat = categories.find((c) => c.id === catId);
+                  const isCatGp = selectedCat?.slug === 'gamepass' || selectedCat?.slug === 'topup';
+                  setFormData({
+                    ...formData,
+                    category_id: catId,
+                    stock_type: isCatGp ? 'manual' : formData.stock_type
+                  });
+                }}
                 className="w-full h-10 px-3 rounded-xl bg-slate-900 border border-slate-700 text-slate-100 outline-none"
               >
                 {categories.map((c) => (
-                  <option key={c.id} value={c.id}>{c.name}</option>
+                  <option key={c.id} value={c.id}>
+                    {c.name} {c.slug === 'gamepass' ? ' (No Stock Keys Needed)' : ''}
+                  </option>
                 ))}
               </select>
             </div>
@@ -627,15 +655,21 @@ export function AdminProducts() {
                 onChange={(e) => setFormData({ ...formData, stock_type: e.target.value })}
                 className="w-full h-10 px-3 rounded-xl bg-slate-900 border border-slate-700 text-slate-100 outline-none"
               >
-                <option value="code">License Code / Key</option>
+                <option value="manual">GamePass / Manual (No Stock Keys Needed)</option>
+                <option value="code">License Code / Key (Digital Stock)</option>
                 <option value="link">Gift Link</option>
                 <option value="account">Account (User/Pass)</option>
                 <option value="text">Digital Text</option>
                 <option value="file">File Download</option>
-                <option value="manual">Manual Customer Support</option>
               </select>
             </div>
           </div>
+
+          {formData.stock_type === 'manual' && (
+            <p className="text-[11px] text-amber-300 bg-amber-500/10 border border-amber-500/20 p-2.5 rounded-xl">
+              💡 <strong>GamePass / Manual Mode:</strong> This product will have <strong>Unlimited Stock</strong>. You do NOT need to add keys or inventory in the Stock tab.
+            </p>
+          )}
 
           <div>
             <label className="font-bold text-slate-300 block mb-1">Price ($ USD) *</label>

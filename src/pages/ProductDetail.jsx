@@ -72,7 +72,15 @@ export function ProductDetail() {
 
   const price = Number(product.price || 0);
 
-  const isOutOfStock = (product.stock_quantity || 0) <= 0;
+  const isGamepass =
+    product.stock_type === 'manual' ||
+    product.category?.slug === 'gamepass' ||
+    product.category?.slug === 'topup' ||
+    product.name?.toLowerCase().includes('gamepass') ||
+    product.name?.toLowerCase().includes('top-up') ||
+    product.name?.toLowerCase().includes('robux');
+
+  const isOutOfStock = !isGamepass && (product.stock_quantity || 0) <= 0;
   const displayName = lang === 'km' && product.name_km ? product.name_km : product.name;
   const description = lang === 'km' && product.description_km ? product.description_km : product.description;
 
@@ -124,7 +132,11 @@ export function ProductDetail() {
         <div className="flex items-center justify-between p-3 rounded-2xl bg-[#0f172a]/60 border border-slate-800/60">
           <div className="flex items-center gap-2">
             <span className="text-xs font-bold text-slate-300">Quantity</span>
-            <StockBadge quantity={product.stock_quantity || 0} stockType={product.stock_type} />
+            <StockBadge
+              quantity={product.stock_quantity || 0}
+              stockType={product.stock_type}
+              isGamepass={isGamepass}
+            />
           </div>
           <div className="flex items-center gap-3">
             <button
@@ -138,8 +150,8 @@ export function ProductDetail() {
               {quantity}
             </span>
             <button
-              onClick={() => setQuantity((q) => Math.min(product.stock_quantity || 1, q + 1))}
-              disabled={quantity >= (product.stock_quantity || 1) || isOutOfStock}
+              onClick={() => setQuantity((q) => isGamepass ? q + 1 : Math.min(product.stock_quantity || 1, q + 1))}
+              disabled={(!isGamepass && quantity >= (product.stock_quantity || 1)) || isOutOfStock}
               className="w-8 h-8 rounded-lg bg-slate-800 hover:bg-slate-700 flex items-center justify-center text-slate-200 disabled:opacity-40 transition-colors"
             >
               <Plus className="w-3.5 h-3.5" />

@@ -8,7 +8,8 @@ import {
   CheckCircle2,
   AlertCircle,
   FileText,
-  KeyRound
+  KeyRound,
+  Sparkles
 } from 'lucide-react';
 import { endpoints } from '../../services/api.js';
 import { Modal } from '../../components/common/Modal.jsx';
@@ -132,7 +133,19 @@ export function AdminStock() {
     }
   };
 
+  const isGamepassProduct = (p) =>
+    p?.stock_type === 'manual' ||
+    p?.category?.slug === 'gamepass' ||
+    p?.category?.slug === 'topup' ||
+    p?.category?.slug === 'robux' ||
+    p?.name?.toLowerCase().includes('gamepass') ||
+    p?.name?.toLowerCase().includes('top-up') ||
+    p?.name?.toLowerCase().includes('topup') ||
+    p?.name?.toLowerCase().includes('robux') ||
+    p?.name?.toLowerCase().includes('r$');
+
   const currentProduct = products.find((p) => p.id === selectedProductId);
+  const isCurrentGamepass = isGamepassProduct(currentProduct);
   const availableCount = stockItems.filter((s) => s.status === 'available').length;
   const soldCount = stockItems.filter((s) => s.status === 'sold').length;
 
@@ -178,7 +191,7 @@ export function AdminStock() {
           >
             {products.map((p) => (
               <option key={p.id} value={p.id}>
-                {p.name}
+                {p.name} {isGamepassProduct(p) ? ' • [Robux / GamePass - Unlimited Stock]' : ''}
               </option>
             ))}
           </select>
@@ -187,13 +200,35 @@ export function AdminStock() {
         {/* Stock counters */}
         <div className="flex items-center gap-3 text-xs">
           <span className="px-3 py-1 rounded-xl bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 font-bold">
-            Available: {availableCount}
+            Available: {isCurrentGamepass ? 'Unlimited (No Stock Needed)' : availableCount}
           </span>
           <span className="px-3 py-1 rounded-xl bg-slate-800 text-slate-400 font-bold">
             Sold: {soldCount}
           </span>
         </div>
       </div>
+
+      {/* GamePass & Robux Product Notice */}
+      {isCurrentGamepass && (
+        <div className="p-4 rounded-2xl bg-gradient-to-r from-amber-500/15 via-pink-500/10 to-slate-900 border border-amber-500/40 flex items-start sm:items-center gap-3">
+          <div className="w-10 h-10 rounded-xl bg-amber-500/20 border border-amber-500/30 flex items-center justify-center text-amber-400 shrink-0">
+            <Sparkles className="w-5 h-5" />
+          </div>
+          <div className="flex-1">
+            <div className="flex items-center gap-2 flex-wrap">
+              <h4 className="text-xs font-black text-amber-300">
+                🪙 Robux Top-Up / GamePass (No Stock Keys Needed)
+              </h4>
+              <span className="px-2 py-0.5 rounded-full text-[10px] font-black uppercase bg-emerald-500/20 text-emerald-300 border border-emerald-500/30">
+                Unlimited Stock
+              </span>
+            </div>
+            <p className="text-[11px] text-slate-300 mt-0.5">
+              Customers can purchase this Robux or GamePass package on-demand at any time. You do not need to add stock items or digital keys. Orders are fulfilled automatically or through the Orders Hub.
+            </p>
+          </div>
+        </div>
+      )}
 
       {/* Stock Inventory Table */}
       <div className="glass-card rounded-2xl border border-slate-800 overflow-hidden">

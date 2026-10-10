@@ -24,12 +24,14 @@ import {
   SlidersHorizontal,
   FileText,
   Send,
-  LogOut
+  LogOut,
+  Download
 } from 'lucide-react';
 import { useAuth } from '../../context/AuthContext.jsx';
 import { useTheme } from '../../context/ThemeContext.jsx';
 import { useLanguage } from '../../context/LanguageContext.jsx';
 import { useTelegram } from '../../hooks/useTelegram.js';
+import { useInstallApp } from '../../context/InstallAppContext.jsx';
 import { UserAvatar } from './UserAvatar.jsx';
 
 export function MenuDrawer({ isOpen, onClose, onOpenTopUp }) {
@@ -37,6 +39,7 @@ export function MenuDrawer({ isOpen, onClose, onOpenTopUp }) {
   const { theme, toggleTheme } = useTheme();
   const { lang, toggleLanguage, t } = useLanguage();
   const { haptic, openTelegramApp } = useTelegram();
+  const { triggerInstall, isStandalone } = useInstallApp();
   const location = useLocation();
 
   // Close menu when route changes
@@ -297,6 +300,33 @@ export function MenuDrawer({ isOpen, onClose, onOpenTopUp }) {
 
         {/* Footer Preferences & Bot Link */}
         <div className="p-4 border-t border-slate-800 bg-slate-950/60 space-y-3">
+          {/* Install App button if not standalone */}
+          {!isStandalone && (
+            <button
+              onClick={() => {
+                haptic('impactLight');
+                triggerInstall();
+              }}
+              className="w-full flex items-center justify-between p-2.5 rounded-xl bg-gradient-to-r from-red-600/20 via-rose-500/10 to-red-600/20 border border-red-500/40 hover:border-red-500/70 text-slate-200 transition-all group"
+            >
+              <div className="flex items-center gap-2.5">
+                <div className="w-8 h-8 rounded-lg bg-red-600 flex items-center justify-center text-white shadow-md shadow-red-600/40 group-hover:scale-105 transition-transform">
+                  <Download className="w-4 h-4" />
+                </div>
+                <div className="text-left">
+                  <div className="text-xs font-bold text-white flex items-center gap-1.5">
+                    {lang === 'km' ? 'ដំឡើង App (ទូរស័ព្ទ & PC)' : 'Install App (Phone & PC)'}
+                    <span className="text-[9px] px-1.5 py-0.5 rounded-full bg-red-500/20 text-red-300 font-semibold uppercase">PWA</span>
+                  </div>
+                  <div className="text-[10px] text-slate-400">
+                    {lang === 'km' ? 'លឿន ងាយស្រួល មិនបាច់បើក Browser' : 'Fast, 1-tap launch, no browser tab'}
+                  </div>
+                </div>
+              </div>
+              <ChevronRight className="w-4 h-4 text-red-400 group-hover:translate-x-0.5 transition-transform" />
+            </button>
+          )}
+
           <div className="grid grid-cols-2 gap-2">
             {/* Language Switch */}
             <button

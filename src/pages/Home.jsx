@@ -20,8 +20,18 @@ import { ProductCardSkeleton } from '../components/common/Badge.jsx';
 import { useLanguage } from '../context/LanguageContext.jsx';
 import { useTelegram } from '../hooks/useTelegram.js';
 
+const categoryImageMap = {
+  bloxfruits: '/categories/bloxfruits.png',
+  fruits: '/categories/fruits.png',
+  gamepass: '/categories/gamepass.png',
+  topup: '/icons/robux_gold.png'
+};
+
 export function Home() {
   const [categories, setCategories] = useState([]);
+  const [selectedCategory, setSelectedCategory] = useState('');
+  const [categoryProducts, setCategoryProducts] = useState([]);
+  const [categoryLoading, setCategoryLoading] = useState(false);
   const [featuredProducts, setFeaturedProducts] = useState([]);
   const [discountProducts, setDiscountProducts] = useState([]);
   const [flashSale, setFlashSale] = useState(null);
@@ -97,6 +107,48 @@ export function Home() {
     return () => clearInterval(interval);
   }, [flashSale?.end_time]);
 
+  // Load products for selected category on Home
+  useEffect(() => {
+    if (!selectedCategory) {
+      setCategoryProducts([]);
+      return;
+    }
+    async function loadCategoryProducts() {
+      setCategoryLoading(true);
+      try {
+        const res = await endpoints.getProducts({
+          categorySlug: selectedCategory === 'hot' ? undefined : selectedCategory,
+          filter: selectedCategory === 'hot' ? 'hot' : undefined,
+          limit: 12
+        });
+        if (res.success && res.data?.items) {
+          setCategoryProducts(res.data.items);
+        } else {
+          setCategoryProducts([]);
+        }
+      } catch (err) {
+        console.error('Error loading category products on Home:', err);
+        setCategoryProducts([]);
+      } finally {
+        setCategoryLoading(false);
+      }
+    }
+    loadCategoryProducts();
+  }, [selectedCategory]);
+
+  const handleCategoryClick = (slug) => {
+    haptic('selection');
+    if (slug === 'topup') {
+      navigate('/topup');
+      return;
+    }
+    if (selectedCategory === slug && slug) {
+      navigate(slug === 'hot' ? '/shop?filter=hot' : `/shop?category=${slug}`);
+      return;
+    }
+    setSelectedCategory(slug);
+  };
+
   const handleSearchSubmit = (e) => {
     e.preventDefault();
     if (searchQuery.trim()) {
@@ -137,6 +189,129 @@ export function Home() {
         </div>
       </Link>
 
+
+      {/* Category Pills & Feature Tabs matching user screenshot & Shop */}
+      <div className="flex gap-2 sm:gap-2.5 overflow-x-auto pb-1.5 pt-0.5 no-scrollbar items-center">
+        {/* 1. Hot Flame Icon Button */}
+        <button
+          type="button"
+          onClick={() => handleCategoryClick(selectedCategory === 'hot' ? '' : 'hot')}
+          title="Hot Deals & Trending"
+          className={`flex items-center justify-center w-11 h-10 rounded-2xl shrink-0 transition-all duration-200 active:scale-95 ${
+            selectedCategory === 'hot'
+              ? 'bg-[#2a0815] border-2 border-pink-500 shadow-[0_0_16px_rgba(236,72,153,0.6)]'
+              : 'bg-[#181120]/90 border border-pink-500/40 hover:border-pink-500 text-pink-400'
+          }`}
+        >
+          <img src="/icons/hot_flame.png" alt="Hot Deals" className="w-5 h-5 object-contain" />
+        </button>
+
+        {/* 2. Robux Top-Up Button with Gold Coin */}
+        <button
+          type="button"
+          onClick={() => handleCategoryClick('topup')}
+          className={`flex items-center gap-2 px-3.5 py-2 rounded-2xl text-xs sm:text-sm font-bold whitespace-nowrap shrink-0 transition-all duration-200 active:scale-95 ${
+            selectedCategory === 'topup'
+              ? 'bg-[#181120] border-2 border-pink-500 text-white shadow-[0_0_14px_rgba(236,72,153,0.55),0_2px_8px_rgba(244,63,94,0.4)]'
+              : 'bg-[#131118]/90 border border-slate-800/80 text-slate-300 hover:text-white hover:border-slate-700'
+          }`}
+        >
+          <img src="/icons/robux_gold.png" alt="Robux" className="w-5 h-5 object-contain shrink-0" />
+          <span>{lang === 'km' ? 'បញ្ចូលលុយ Game' : 'Robux Top-Up'}</span>
+        </button>
+
+        {/* 3. All Products Button */}
+        <button
+          type="button"
+          onClick={() => handleCategoryClick('')}
+          className={`flex items-center justify-center px-4 py-2 rounded-2xl text-xs sm:text-sm font-bold whitespace-nowrap shrink-0 transition-all duration-200 active:scale-95 ${
+            selectedCategory === ''
+              ? 'bg-[#181120] border-2 border-pink-500 text-white shadow-[0_0_14px_rgba(236,72,153,0.55),0_2px_8px_rgba(244,63,94,0.4)]'
+              : 'bg-[#131118]/90 border border-slate-800/80 text-slate-300 hover:text-white hover:border-slate-700'
+          }`}
+        >
+          <span>{t('common.all') || 'All'}</span>
+        </button>
+
+        {/* 4. Other Categories (Bloxfruits, Fruits, Gamepass, Steal an Egg...) */}
+        {categories
+          .filter((cat) => cat.slug !== 'topup' && cat.slug !== 'game-keys')
+          .map((cat) => {
+            const isSelected = selectedCategory === cat.slug;
+            const displayName = lang === 'km' && cat.name_km ? cat.name_km : cat.name;
+            const iconUrl = categoryImageMap[cat.slug] || cat.image_url;
+            return (
+              <button
+                key={cat.id}
+                type="button"
+                onClick={() => handleCategoryClick(cat.slug)}
+                className={`flex items-center gap-2 px-3.5 py-2 rounded-2xl text-xs sm:text-sm font-bold whitespace-nowrap shrink-0 transition-all duration-200 active:scale-95 ${
+                  isSelected
+                    ? 'bg-[#181120] border-2 border-pink-500 text-white shadow-[0_0_14px_rgba(236,72,153,0.55),0_2px_8px_rgba(244,63,94,0.4)]'
+                    : 'bg-[#131118]/90 border border-slate-800/80 text-slate-300 hover:text-white hover:border-slate-700'
+                }`}
+              >
+                {iconUrl && (
+                  <div className="w-5 h-5 rounded-md overflow-hidden flex items-center justify-center shrink-0">
+                    <img src={iconUrl} alt={displayName} className="w-full h-full object-contain" />
+                  </div>
+                )}
+                <span>{displayName}</span>
+              </button>
+            );
+          })}
+      </div>
+
+      {/* Selected Category Products on Home */}
+      {selectedCategory && (
+        <section className="space-y-3.5 animate-in fade-in-50 duration-200">
+          <div className="flex items-center justify-between pb-1 border-b border-slate-800/60">
+            <div className="flex items-center gap-2.5">
+              <div className="w-8 h-8 rounded-xl bg-slate-900 border border-pink-500/40 flex items-center justify-center p-1 shadow-lg shadow-pink-500/10">
+                {selectedCategory === 'hot' ? (
+                  <img src="/icons/hot_flame.png" alt="" className="w-5 h-5 object-contain" />
+                ) : categoryImageMap[selectedCategory] ? (
+                  <img src={categoryImageMap[selectedCategory]} alt="" className="w-full h-full object-contain" />
+                ) : (
+                  <Sparkles className="w-4 h-4 text-pink-400" />
+                )}
+              </div>
+              <div className="flex items-center gap-2">
+                <h2 className="text-lg sm:text-xl font-black text-slate-100 capitalize">
+                  {selectedCategory === 'hot'
+                    ? (lang === 'km' ? 'ទំនិញពេញនិយម & លក់ដាច់' : 'Hot Deals & Trending')
+                    : categories.find((c) => c.slug === selectedCategory)?.name || selectedCategory}
+                </h2>
+                {!categoryLoading && (
+                  <span className="text-[11px] font-bold px-2 py-0.5 rounded-full bg-pink-500/15 text-pink-300 border border-pink-500/30">
+                    {categoryProducts.length} items
+                  </span>
+                )}
+              </div>
+            </div>
+
+            <Link
+              to={selectedCategory === 'hot' ? '/shop?filter=hot' : `/shop?category=${selectedCategory}`}
+              className="text-xs font-bold text-pink-400 hover:text-pink-300 hover:underline flex items-center gap-1"
+            >
+              <span>{t('home.viewAll') || 'View All in Shop'}</span>
+              <ArrowRight className="w-3 h-3" />
+            </Link>
+          </div>
+
+          <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-3 gap-3 sm:gap-4">
+            {categoryLoading ? (
+              Array.from({ length: 6 }).map((_, i) => <ProductCardSkeleton key={i} />)
+            ) : categoryProducts.length > 0 ? (
+              categoryProducts.map((p) => <ProductCard key={p.id} product={p} />)
+            ) : (
+              <div className="col-span-full py-12 text-center text-slate-400 text-xs rounded-2xl border border-slate-800/80 bg-slate-900/30">
+                {lang === 'km' ? 'មិនមានទំនិញក្នុងក្រុមនេះនៅឡើយទេ' : 'No products found in this category'}
+              </div>
+            )}
+          </div>
+        </section>
+      )}
 
       {/* Flash Sale / Featured Products */}
       {(!flashSale || flashSale.enabled !== false) && (

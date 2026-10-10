@@ -62,7 +62,18 @@ export function ProductCard({ product }) {
               </span>
             </div>
 
-            <StockBadge quantity={product.stock_quantity || 0} stockType={product.stock_type} />
+            <StockBadge
+              quantity={product.stock_quantity || 0}
+              stockType={product.stock_type}
+              isGamepass={
+                product.stock_type === 'manual' ||
+                product.category?.slug === 'gamepass' ||
+                product.category?.slug === 'topup' ||
+                product.name?.toLowerCase().includes('gamepass') ||
+                product.name?.toLowerCase().includes('top-up') ||
+                product.name?.toLowerCase().includes('robux')
+              }
+            />
           </div>
         </div>
       </div>

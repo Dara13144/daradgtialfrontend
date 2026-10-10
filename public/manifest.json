@@ -1,0 +1,55 @@
+{
+  "name": "𝑀𝑎𝑖𝑠𝑒𝑟 𝑆𝑡𝑜𝑟𝑒",
+  "short_name": "Maiser Store",
+  "description": "Official Digital Store & Instant Delivery",
+  "start_url": "/",
+  "scope": "/",
+  "display": "standalone",
+  "background_color": "#46000c",
+  "theme_color": "#46000c",
+  "orientation": "portrait-primary",
+  "categories": ["shopping", "games", "entertainment"],
+  "icons": [
+    {
+      "src": "/maiser_logo.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "/maiser_logo.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "/maiser_logo.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "maskable"
+    }
+  ],
+  "shortcuts": [
+    {
+      "name": "Shop Catalog",
+      "short_name": "Shop",
+      "description": "Browse all digital products",
+      "url": "/shop",
+      "icons": [{ "src": "/maiser_logo.png", "sizes": "192x192" }]
+    },
+    {
+      "name": "Roblox GamePass & Top-Up",
+      "short_name": "Top-Up",
+      "description": "Fast Robux & Blox Fruits GamePass",
+      "url": "/topup",
+      "icons": [{ "src": "/maiser_logo.png", "sizes": "192x192" }]
+    },
+    {
+      "name": "My Orders",
+      "short_name": "Orders",
+      "description": "View your purchase history & keys",
+      "url": "/orders",
+      "icons": [{ "src": "/maiser_logo.png", "sizes": "192x192" }]
+    }
+  ]
+}

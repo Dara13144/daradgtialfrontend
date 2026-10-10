@@ -4,6 +4,8 @@ import { Header } from '../components/common/Header.jsx';
 import { BottomNav } from '../components/common/BottomNav.jsx';
 import { GoogleAuthModal } from '../components/auth/GoogleAuthModal.jsx';
 import { TelegramChatSupport } from '../components/common/TelegramChatSupport.jsx';
+import { InstallAppModal } from '../components/common/InstallAppModal.jsx';
+import { InstallAppBanner } from '../components/common/InstallAppBanner.jsx';
 import { Shield, Zap, Heart, MessageCircle } from 'lucide-react';
 import { useLanguage } from '../context/LanguageContext.jsx';
 
@@ -11,12 +13,12 @@ export function MainLayout() {
   const { lang, t } = useLanguage();
 
   return (
-    <div className="min-h-screen flex flex-col bg-transparent text-slate-100 selection:bg-rose-500 selection:text-white">
+    <div className="min-h-screen min-h-[100dvh] w-full max-w-full overflow-x-hidden flex flex-col bg-transparent text-slate-100 selection:bg-rose-500 selection:text-white">
       {/* Top Header */}
       <Header />
 
       {/* Main Page Content */}
-      <main className="flex-1 max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-4 sm:py-6 safe-bottom-padding">
+      <main className="flex-1 max-w-7xl w-full mx-auto px-3 sm:px-6 lg:px-8 py-3.5 sm:py-6 safe-bottom-padding">
         <Outlet />
       </main>
 
@@ -62,6 +64,12 @@ export function MainLayout() {
 
       {/* Floating 24/7 Telegram Chat Support Button */}
       <TelegramChatSupport />
+
+      {/* Floating PWA Install App Banner (Phone & PC) */}
+      <InstallAppBanner />
+
+      {/* Interactive App Install Modal & Setup Guide */}
+      <InstallAppModal />
     </div>
   );
 }
